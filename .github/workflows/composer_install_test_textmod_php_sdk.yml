@@ -6,7 +6,6 @@ on:
       - master
 
 env:
-  PACKAGE_NAME: textmod-sdk
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   TEXTMOD_AUTH_TOKEN: ${{ secrets.TEXTMOD_AUTH_TOKEN }}
 
