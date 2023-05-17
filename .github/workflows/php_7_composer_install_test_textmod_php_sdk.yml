@@ -3,7 +3,7 @@ name: lint_test_build_textmod_node_sdk
 on:
   pull_request:
     branches:
-      - master
+      - php7
 
 env:
   PACKAGE_NAME: textmod-sdk
@@ -23,10 +23,6 @@ jobs:
           - '7.2'
           - '7.3'
           - '7.4'
-          - '8.0'
-          - '8.1'
-          - '8.2'
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
