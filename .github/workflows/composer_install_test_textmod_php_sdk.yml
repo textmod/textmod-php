@@ -1,0 +1,53 @@
+name: lint_test_build_textmod_node_sdk
+
+on:
+  pull_request:
+    branches:
+      - master
+
+env:
+  PACKAGE_NAME: textmod-sdk
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  TEXTMOD_AUTH_TOKEN: ${{ secrets.TEXTMOD_AUTH_TOKEN }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version:
+          - '7.0'
+          - '7.1'
+          - '7.2'
+          - '7.3'
+          - '7.4'
+          - '8.0'
+          - '8.1'
+          - '8.2'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: xdebug # Enable Xdebug for code coverage
+
+      - name: Install Xdebug
+        if: startsWith(matrix.php-version, '7.') # Xdebug is not required for PHP 8.x
+        run: sudo apt-get install -y php-xdebug
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run PHPUnit tests with coverage
+        run: vendor/bin/phpunit --bootstrap vendor/autoload.php tests --coverage-clover=coverage.xml --whitelist=src/ --coverage-php
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
