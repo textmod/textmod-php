@@ -1,14 +1,14 @@
 {
     "name": "textmod/textmod-php",
-    "description": "TextMod - php sdk",
+    "description": "TextMod - PHP SDK",
     "type": "library",
     "require": {
-        "php": "^7.0 || ^8.0",
+        "php": "7.0.* || 8.0.*",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^6"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6"
+        "phpunit/phpunit": "^9"
     },
     "license": "MIT",
     "autoload": {
@@ -28,6 +28,11 @@
         }
     ],
     "scripts": {
-        "test": "phpunit --bootstrap vendor/autoload.php tests --coverage-clover coverage.xml  --whitelist src/"
+        "test": "phpunit --bootstrap vendor/autoload.php tests --coverage-clover coverage.xml --whitelist src/"
+    },
+    "config": {
+        "platform": {
+            "php": "7.0 || 8.0"
+        }
     }
 }
