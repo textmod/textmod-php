@@ -1,0 +1,33 @@
+{
+    "name": "textmod/textmod-php",
+    "description": "TextMod - php sdk",
+    "type": "library",
+    "require": {
+        "php": "^7.0",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "TextMod\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TextMod\\Test\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Boris Claus Verhaaff",
+            "email": "boris@textmod.xyz"
+        }
+    ],
+    "scripts": {
+        "test": "phpunit --bootstrap vendor/autoload.php tests --coverage-clover coverage.xml  --whitelist src/"
+    }
+}
