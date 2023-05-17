@@ -32,7 +32,12 @@
     },
     "config": {
         "platform": {
-            "php": "7.0 || 8.0"
+            "php": "7.0"
+        }
+    },
+    "extra": {
+        "platform": {
+            "php": "8.0"
         }
     }
 }
