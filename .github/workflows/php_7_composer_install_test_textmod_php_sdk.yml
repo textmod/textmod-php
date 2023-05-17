@@ -41,7 +41,7 @@ jobs:
         run: composer install
 
       - name: Run PHPUnit tests with coverage
-        run: vendor/bin/phpunit --bootstrap vendor/autoload.php tests --coverage-clover=coverage.xml --whitelist=src/ --coverage-php
+        run: composer test
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v3
