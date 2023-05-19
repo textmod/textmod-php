@@ -1,0 +1,72 @@
+name: Semver Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Select the version to publish'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      php_version:
+        description: 'Select the PHP version suffix'
+        required: true
+        default: 'php7'
+        type: choice
+        options:
+          - php7
+          - php8
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Determine next version
+        id: version
+        run: |
+          php -r '
+          $tags = explode("\n", shell_exec("git tag"));
+          rsort($tags, SORT_NATURAL);
+          $highestVersion = $tags[0];
+          $versionParts = explode(".", $highestVersion);
+          $majorVersion = (int)$versionParts[0];
+          $minorVersion = (int)$versionParts[1];
+          $patchVersion = (int)$versionParts[2];
+          $nextVersion = "";
+
+          switch (${{ github.event.inputs.version }}) {
+              case "patch":
+                  $nextVersion = $majorVersion . "." . $minorVersion . "." . ($patchVersion + 1);
+                  break;
+              case "minor":
+                  $nextVersion = $majorVersion . "." . ($minorVersion + 1) . ".0";
+                  break;
+              case "major":
+                  $nextVersion = ($majorVersion + 1) . ".0.0";
+                  break;
+              default:
+                  $nextVersion = $highestVersion;
+          }
+
+          echo "VERSION=${nextVersion}" >> $GITHUB_ENV;
+          '
+
+      - name: Add PHP version suffix
+        id: version_suffix
+        run: |
+          echo "VERSION_SUFFIX=-${{ github.event.inputs.php_version }}" >> $GITHUB_ENV;
+
+      - name: Create tag
+        run: |
+          git tag ${{ env.VERSION }}${{ env.VERSION_SUFFIX }}
+          git push origin ${{ env.VERSION }}${{ env.VERSION_SUFFIX }}
