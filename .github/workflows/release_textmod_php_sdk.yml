@@ -1,4 +1,4 @@
-name: Semver Tag
+name: release_textmod_php_sdk
 
 on:
   workflow_dispatch:
@@ -20,7 +20,11 @@ on:
         options:
           - php7
           - php8
-
+      branch:
+        description: 'Select the branch to run the workflow'
+        required: true
+        default: 'php7'
+        type: string
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -28,38 +32,41 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
       - name: Determine next version
         id: version
         run: |
-          php -r '
-          $tags = explode("\n", shell_exec("git tag"));
-          rsort($tags, SORT_NATURAL);
-          $highestVersion = $tags[0];
-          $versionParts = explode(".", $highestVersion);
-          $majorVersion = (int)$versionParts[0];
-          $minorVersion = (int)$versionParts[1];
-          $patchVersion = (int)$versionParts[2];
-          $nextVersion = "";
-
-          switch (${{ github.event.inputs.version }}) {
-              case "patch":
-                  $nextVersion = $majorVersion . "." . $minorVersion . "." . ($patchVersion + 1);
-                  break;
-              case "minor":
-                  $nextVersion = $majorVersion . "." . ($minorVersion + 1) . ".0";
-                  break;
-              case "major":
-                  $nextVersion = ($majorVersion + 1) . ".0.0";
-                  break;
-              default:
-                  $nextVersion = $highestVersion;
-          }
-
-          echo "VERSION=${nextVersion}" >> $GITHUB_ENV;
-          '
+            php -r '
+            $tags = explode("\n", shell_exec("git tag"));
+            rsort($tags, SORT_NATURAL);
+            $highestVersion = !empty($tags[0]) ? $tags[0] : "1.0.0";
+            $versionParts = explode(".", $highestVersion);
+            $majorVersion = isset($versionParts[0]) ? (int)$versionParts[0] : 0;
+            $minorVersion = isset($versionParts[1]) ? (int)$versionParts[1] : 0;
+            $patchVersion = isset($versionParts[2]) ? (int)$versionParts[2] : 0;
+            $nextVersion = "";
+        
+            $inputVersion = "${{ github.event.inputs.version }}";
+        
+            switch ($inputVersion) {
+                case "patch":
+                    $nextVersion = $majorVersion . "." . $minorVersion . "." . ($patchVersion + 1);
+                    break;
+                case "minor":
+                    $nextVersion = $majorVersion . "." . ($minorVersion + 1) . ".0";
+                    break;
+                case "major":
+                    $nextVersion = ($majorVersion + 1) . ".0.0";
+                    break;
+                default:
+                    $nextVersion = $highestVersion;
+            }
+        
+            echo "VERSION=${nextVersion}" >> $GITHUB_ENV;
+            '
+        
 
       - name: Add PHP version suffix
         id: version_suffix
