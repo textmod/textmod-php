@@ -37,8 +37,6 @@ jobs:
 
       - name: Determine next version
         id: version
-        env:
-          GITHUB_ENV: ${{ env.GITHUB_ENV }}
         run: |
             php -r '
             $tags = explode("\n", shell_exec("git tag"));
@@ -66,7 +64,9 @@ jobs:
                     $nextVersion = $highestVersion;
             }
         
-            echo "VERSION=${nextVersion}" >> $GITHUB_ENV;
+            $envFile = fopen(getenv("GITHUB_ENV"), "a");
+            fwrite($envFile, "VERSION=${nextVersion}" . PHP_EOL);
+            fclose($envFile);
             '
         
 
