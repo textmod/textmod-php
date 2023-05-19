@@ -15,7 +15,7 @@ on:
       php_version:
         description: 'Select the PHP version suffix'
         required: true
-        default: 'php7'
+        default: 'php8'
         type: choice
         options:
           - php7
@@ -23,7 +23,7 @@ on:
       branch:
         description: 'Select the branch to run the workflow'
         required: true
-        default: 'php7'
+        default: 'php8'
         type: string
 jobs:
   tag:
@@ -64,7 +64,9 @@ jobs:
                     $nextVersion = $highestVersion;
             }
         
-            echo "VERSION=${nextVersion}" >> $GITHUB_ENV;
+            $envFile = fopen(getenv("GITHUB_ENV"), "a");
+            fwrite($envFile, "VERSION=${nextVersion}" . PHP_EOL);
+            fclose($envFile);
             '
         
 
