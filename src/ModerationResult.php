@@ -9,19 +9,19 @@ use stdClass;
  */
 class ModerationResult
 {
-    private $data;
-    public $spam;
-    public $selfPromoting;
-    public $hate;
-    public $terrorism;
-    public $extremism;
-    public $pornographic;
-    public $threatening;
-    public $selfHarm;
-    public $sexual;
-    public $sexualMinors;
-    public $violence;
-    public $violenceGraphic;
+    private stdClass $data;
+    public bool $spam;
+    public bool $selfPromoting;
+    public bool $hate;
+    public bool $terrorism;
+    public bool $extremism;
+    public bool $pornographic;
+    public bool $threatening;
+    public bool $selfHarm;
+    public bool $sexual;
+    public bool $sexualMinors;
+    public bool $violence;
+    public bool $violenceGraphic;
 
     public function __construct(array $data)
     {

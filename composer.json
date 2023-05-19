@@ -3,12 +3,12 @@
     "description": "TextMod - php sdk",
     "type": "library",
     "require": {
-        "php": "^7.0",
+        "php": "^8.0",
         "ext-json": "*",
-        "guzzlehttp/guzzle": "^6"
+        "guzzlehttp/guzzle": "^7"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6"
+        "phpunit/phpunit": "^9"
     },
     "license": "MIT",
     "autoload": {
@@ -28,6 +28,6 @@
         }
     ],
     "scripts": {
-        "test": "phpunit --bootstrap vendor/autoload.php tests --coverage-clover coverage.xml  --whitelist src/"
+        "test": "XDEBUG_MODE=coverage phpunit --bootstrap vendor/autoload.php tests --coverage-clover coverage.xml  --whitelist src/"
     }
 }
