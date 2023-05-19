@@ -1,0 +1,99 @@
+name: release_textmod_php_sdk
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Select the version to publish'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      php_version:
+        description: 'Select the PHP version suffix'
+        required: true
+        default: 'php7'
+        type: choice
+        options:
+          - php7
+          - php8
+      branch:
+        description: 'Select the branch to run the workflow'
+        required: true
+        default: 'php7'
+        type: string
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Determine next version
+        id: version
+        run: |
+          php -r '
+          $tags = explode("\n", shell_exec("git tag"));
+          rsort($tags, SORT_NATURAL);
+          
+          $nextVersion = "";
+          
+          $inputVersion = "${{ github.event.inputs.version }}";
+          $phpVersionSuffix = "-${{ github.event.inputs.php_version }}";
+          
+          if (empty($tags)) {
+              // No existing tags, set a default starting version
+              $nextVersion = "1.0.0";
+          } else {
+              // Find the highest version with the matching PHP version suffix
+              foreach ($tags as $tag) {
+                  if (strpos($tag, $phpVersionSuffix) !== false) {
+                      $currentVersion = str_replace($phpVersionSuffix, "", $tag);
+                      $nextVersion = $currentVersion;
+                      break;
+                  }
+              }
+          
+              if (empty($nextVersion)) {
+                  // No existing tag found with the PHP version suffix, set a default starting version
+                  $nextVersion = "1.0.0";
+              }
+          }
+          
+          switch ($inputVersion) {
+              case "patch":
+                  $versionParts = explode(".", $nextVersion);
+                  $patchVersion = isset($versionParts[2]) ? (int)$versionParts[2] : 0;
+                  $nextVersion = $versionParts[0] . "." . $versionParts[1] . "." . ($patchVersion + 1);
+                  break;
+              case "minor":
+                  $versionParts = explode(".", $nextVersion);
+                  $minorVersion = isset($versionParts[1]) ? (int)$versionParts[1] : 0;
+                  $nextVersion = $versionParts[0] . "." . ($minorVersion + 1) . ".0";
+                  break;
+              case "major":
+                  $versionParts = explode(".", $nextVersion);
+                  $majorVersion = isset($versionParts[0]) ? (int)$versionParts[0] : 0;
+                  $nextVersion = ($majorVersion + 1) . ".0.0";
+                  break;
+          }
+          
+          $nextVersion .= $phpVersionSuffix;
+          
+          $envFile = fopen(getenv("GITHUB_ENV"), "a");
+          fwrite($envFile, "VERSION=${nextVersion}" . PHP_EOL);
+          fclose($envFile);
+          '
+
+      - name: Create tag
+        run: |
+          git tag ${{ env.VERSION }}
+          git push origin ${{ env.VERSION }}
