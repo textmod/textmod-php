@@ -1,0 +1,79 @@
+name: release_textmod_php_sdk
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Select the version to publish'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      php_version:
+        description: 'Select the PHP version suffix'
+        required: true
+        default: 'php8'
+        type: choice
+        options:
+          - php7
+          - php8
+      branch:
+        description: 'Select the branch to run the workflow'
+        required: true
+        default: 'php8'
+        type: string
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Determine next version
+        id: version
+        run: |
+            php -r '
+            $tags = explode("\n", shell_exec("git tag"));
+            rsort($tags, SORT_NATURAL);
+            $highestVersion = !empty($tags[0]) ? $tags[0] : "1.0.0";
+            $versionParts = explode(".", $highestVersion);
+            $majorVersion = isset($versionParts[0]) ? (int)$versionParts[0] : 0;
+            $minorVersion = isset($versionParts[1]) ? (int)$versionParts[1] : 0;
+            $patchVersion = isset($versionParts[2]) ? (int)$versionParts[2] : 0;
+            $nextVersion = "";
+        
+            $inputVersion = "${{ github.event.inputs.version }}";
+        
+            switch ($inputVersion) {
+                case "patch":
+                    $nextVersion = $majorVersion . "." . $minorVersion . "." . ($patchVersion + 1);
+                    break;
+                case "minor":
+                    $nextVersion = $majorVersion . "." . ($minorVersion + 1) . ".0";
+                    break;
+                case "major":
+                    $nextVersion = ($majorVersion + 1) . ".0.0";
+                    break;
+                default:
+                    $nextVersion = $highestVersion;
+            }
+        
+            echo "VERSION=${nextVersion}" >> $GITHUB_ENV;
+            '
+        
+
+      - name: Add PHP version suffix
+        id: version_suffix
+        run: |
+          echo "VERSION_SUFFIX=-${{ github.event.inputs.php_version }}" >> $GITHUB_ENV;
+
+      - name: Create tag
+        run: |
+          git tag ${{ env.VERSION }}${{ env.VERSION_SUFFIX }}
+          git push origin ${{ env.VERSION }}${{ env.VERSION_SUFFIX }}
