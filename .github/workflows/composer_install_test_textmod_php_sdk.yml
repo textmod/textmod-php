@@ -1,4 +1,4 @@
-name: lint_test_build_textmod_node_sdk
+name: composer_install_test_textmod_php_sdk
 
 on:
   pull_request:
