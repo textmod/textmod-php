@@ -25,9 +25,11 @@ on:
         required: true
         default: 'php7'
         type: string
+
 jobs:
   tag:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -45,8 +47,7 @@ jobs:
           $nextVersion = "";
           
           $inputVersion = "${{ github.event.inputs.version }}";
-          $phpVersion = phpversion();
-          $phpVersionSuffix = "-php" . str_replace(".", "", $phpVersion);
+          $phpVersionSuffix = "-${{ github.event.inputs.php_version }}";
           
           if (empty($tags)) {
               // No existing tags, set a default starting version
@@ -92,12 +93,7 @@ jobs:
           fclose($envFile);
           '
 
-      - name: Add PHP version suffix
-        id: version_suffix
-        run: |
-          echo "VERSION_SUFFIX=-${{ github.event.inputs.php_version }}" >> $GITHUB_ENV;
-
       - name: Create tag
         run: |
-          git tag ${{ env.VERSION }}${{ env.VERSION_SUFFIX }}
-          git push origin ${{ env.VERSION }}${{ env.VERSION_SUFFIX }}
+          git tag ${{ env.VERSION }}
+          git push origin ${{ env.VERSION }}
