@@ -12,14 +12,6 @@ on:
           - patch
           - minor
           - major
-      php_version:
-        description: 'Select the PHP version suffix'
-        required: true
-        default: 'php8'
-        type: choice
-        options:
-          - php7
-          - php8
       branch:
         description: 'Select the branch to run the workflow'
         required: true
@@ -47,23 +39,22 @@ jobs:
           $nextVersion = "";
           
           $inputVersion = "${{ github.event.inputs.version }}";
-          $phpVersionSuffix = "-${{ github.event.inputs.php_version }}";
           
           if (empty($tags)) {
               // No existing tags, set a default starting version
               $nextVersion = "1.0.0";
           } else {
-              // Find the highest version with the matching PHP version suffix
+              // Find the highest version
               foreach ($tags as $tag) {
-                  if (strpos($tag, $phpVersionSuffix) !== false) {
-                      $currentVersion = str_replace($phpVersionSuffix, "", $tag);
+                  if (preg_match('/(\d+\.\d+\.\d+)/', $tag, $matches)) {
+                      $currentVersion = $matches[1];
                       $nextVersion = $currentVersion;
                       break;
                   }
               }
           
               if (empty($nextVersion)) {
-                  // No existing tag found with the PHP version suffix, set a default starting version
+                  // No existing tag found, set a default starting version
                   $nextVersion = "1.0.0";
               }
           }
@@ -85,8 +76,6 @@ jobs:
                   $nextVersion = ($majorVersion + 1) . ".0.0";
                   break;
           }
-          
-          $nextVersion .= $phpVersionSuffix;
           
           $envFile = fopen(getenv("GITHUB_ENV"), "a");
           fwrite($envFile, "VERSION=${nextVersion}" . PHP_EOL);
