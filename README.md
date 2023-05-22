@@ -1,7 +1,7 @@
 # TextMod SDK for PHP
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![codecov](https://codecov.io/gh/textmod/textmod-php/branch/php8/graph/badge.svg?token=JCi7zaNRHv)](https://codecov.io/gh/textmod/textmod-php)
+[![codecov](https://codecov.io/gh/textmod/textmod-php/branch/php7/graph/badge.svg?token=JCi7zaNRHv)](https://codecov.io/gh/textmod/textmod-php)
 
 This is an SDK for the [TextMod API](https://textmod.xyz/) that allows you to easily moderate text content for various sentiments such as spam, hate, and pornography.
 
