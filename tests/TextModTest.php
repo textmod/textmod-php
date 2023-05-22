@@ -12,19 +12,23 @@ use TextMod\ModerationResult;
  */
 class TextModTest extends TestCase
 {
+    private string $authToken;
+
     /**
      * @throws Exception
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->authToken = getenv('TEXTMOD_AUTH_TOKEN');
 
         if (!$this->authToken) {
             throw new Exception('No TextMod auth token found in environment variables');
         }
+
+        parent::setUp();
     }
 
-    public function testModerateMethod()
+    public function testModerateMethod(): void
     {
         $textMod = new TextMod(['authToken' => $this->authToken]);
         $text = 'This is some test text';
@@ -45,7 +49,7 @@ class TextModTest extends TestCase
         $this->assertFalse($moderationResult->violenceGraphic);
     }
 
-    public function testModerateMethodWithCustomFilterSentiments()
+    public function testModerateMethodWithCustomFilterSentiments(): void
     {
         $text = 'This is some test text';
         $filterSentiments = [
