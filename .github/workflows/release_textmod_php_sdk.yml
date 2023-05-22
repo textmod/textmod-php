@@ -17,6 +17,10 @@ on:
         required: true
         default: 'php8'
         type: string
+env:
+  PACKAGE_NAME: textmod-sdk
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  TEXTMOD_AUTH_TOKEN: ${{ secrets.TEXTMOD_AUTH_TOKEN }}
 
 jobs:
   build:
