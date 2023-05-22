@@ -21,11 +21,15 @@ if (empty($tags)) {
     };
 } else {
     // Find the highest version without the branch suffix
+// Find the highest version without the branch suffix
     foreach ($tags as $tag) {
         if (preg_match('/^(\d+\.\d+\.\d+)$/', $tag, $matches)) {
             $currentVersion = $matches[1];
+            if (str_starts_with($currentVersion, "7")) {
+                $nextVersion = $currentVersion;
+                break;
+            }
             $nextVersion = $currentVersion;
-            break;
         }
     }
 
