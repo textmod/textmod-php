@@ -70,10 +70,8 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
-      - name: Determine next version
-        id: version
         run: |
-          nextVersion=$(php .github/scripts/determine_version.php "${{ github.event.inputs.version }}")
+          nextVersion=$(php .github/scripts/determine_version.php "${{ github.event.inputs.version }}" "${{ github.event.inputs.branch }}")
           echo "VERSION=${nextVersion}" >> $GITHUB_ENV
 
       - name: Create tag
