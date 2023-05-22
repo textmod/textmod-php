@@ -19,22 +19,22 @@ if (empty($tags)) {
         case "php7":
             $nextVersion = "7.0.0";
             break;
-        case "php8":
         default:
             $nextVersion = "8.0.0";
             break;
     }
 } else {
     // Find the highest version without the branch suffix
-// Find the highest version without the branch suffix
     foreach ($tags as $tag) {
         if (preg_match('/^(\d+\.\d+\.\d+)$/', $tag, $matches)) {
             $currentVersion = $matches[1];
-            if (substr($currentVersion, 0, 1) == "7") {
+            if (strpos($currentVersion, "7") === 0 && $branch === "php7") {
+                $nextVersion = $currentVersion;
+                break;
+            } elseif (strpos($currentVersion, "8") === 0 && $branch === "php8") {
                 $nextVersion = $currentVersion;
                 break;
             }
-            $nextVersion = $currentVersion;
         }
     }
 
@@ -44,7 +44,6 @@ if (empty($tags)) {
             case "php7":
                 $nextVersion = "7.0.0";
                 break;
-            case "php8":
             default:
                 $nextVersion = "8.0.0";
                 break;
