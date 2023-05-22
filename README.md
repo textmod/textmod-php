@@ -11,7 +11,7 @@ To use the TextMod SDK for PHP, you can add it as a dependency in your `composer
 ```json
 {
     "require": {
-        "textmod/textmod-php": "^1.0"
+        "textmod/textmod-php": "^7.0"
     }
 }
 ```

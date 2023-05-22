@@ -12,23 +12,58 @@ on:
           - patch
           - minor
           - major
-      php_version:
-        description: 'Select the PHP version suffix'
-        required: true
-        default: 'php7'
-        type: choice
-        options:
-          - php7
-          - php8
       branch:
         description: 'Select the branch to run the workflow'
         required: true
         default: 'php7'
         type: string
+env:
+  PACKAGE_NAME: textmod-sdk
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  TEXTMOD_AUTH_TOKEN: ${{ secrets.TEXTMOD_AUTH_TOKEN }}
 
 jobs:
-  tag:
+  build:
+
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version:
+          - '7.0'
+          - '7.1'
+          - '7.2'
+          - '7.3'
+          - '7.4'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: xdebug # Enable Xdebug for code coverage
+
+      - name: Install Xdebug
+        if: startsWith(matrix.php-version, '7.') # Xdebug is not required for PHP 8.x
+        run: sudo apt-get install -y php-xdebug
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run PHPUnit tests with coverage
+        run: composer test
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Checkout Code
@@ -40,58 +75,8 @@ jobs:
       - name: Determine next version
         id: version
         run: |
-          php -r '
-          $tags = explode("\n", shell_exec("git tag"));
-          rsort($tags, SORT_NATURAL);
-          
-          $nextVersion = "";
-          
-          $inputVersion = "${{ github.event.inputs.version }}";
-          $phpVersionSuffix = "-${{ github.event.inputs.php_version }}";
-          
-          if (empty($tags)) {
-              // No existing tags, set a default starting version
-              $nextVersion = "1.0.0";
-          } else {
-              // Find the highest version with the matching PHP version suffix
-              foreach ($tags as $tag) {
-                  if (strpos($tag, $phpVersionSuffix) !== false) {
-                      $currentVersion = str_replace($phpVersionSuffix, "", $tag);
-                      $nextVersion = $currentVersion;
-                      break;
-                  }
-              }
-          
-              if (empty($nextVersion)) {
-                  // No existing tag found with the PHP version suffix, set a default starting version
-                  $nextVersion = "1.0.0";
-              }
-          }
-          
-          switch ($inputVersion) {
-              case "patch":
-                  $versionParts = explode(".", $nextVersion);
-                  $patchVersion = isset($versionParts[2]) ? (int)$versionParts[2] : 0;
-                  $nextVersion = $versionParts[0] . "." . $versionParts[1] . "." . ($patchVersion + 1);
-                  break;
-              case "minor":
-                  $versionParts = explode(".", $nextVersion);
-                  $minorVersion = isset($versionParts[1]) ? (int)$versionParts[1] : 0;
-                  $nextVersion = $versionParts[0] . "." . ($minorVersion + 1) . ".0";
-                  break;
-              case "major":
-                  $versionParts = explode(".", $nextVersion);
-                  $majorVersion = isset($versionParts[0]) ? (int)$versionParts[0] : 0;
-                  $nextVersion = ($majorVersion + 1) . ".0.0";
-                  break;
-          }
-          
-          $nextVersion .= $phpVersionSuffix;
-          
-          $envFile = fopen(getenv("GITHUB_ENV"), "a");
-          fwrite($envFile, "VERSION=${nextVersion}" . PHP_EOL);
-          fclose($envFile);
-          '
+          nextVersion=$(php .github/scripts/determine_version.php "${{ github.event.inputs.version }}")
+          echo "VERSION=${nextVersion}" >> $GITHUB_ENV
 
       - name: Create tag
         run: |
