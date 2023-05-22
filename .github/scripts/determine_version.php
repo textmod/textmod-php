@@ -47,9 +47,9 @@ switch ($inputVersion) {
         switch ($branch) {
             case "php7":
                 if ($versionParts[0] == 7 && $versionParts[1] == 0 && $versionParts[2] == 0) {
-                    $nextVersion = $versionParts[0] . "." . $versionParts[1] . "." . ($patchVersion + 1);
+                    $nextVersion = "7.0." . ($patchVersion + 1);
                 } else {
-                    $nextVersion = $versionParts[0] . "." . $versionParts[1] . "." . $versionParts[2];
+                    $nextVersion = $versionParts[0] . "." . $versionParts[1] . "." . ($patchVersion + 1);
                 }
                 break;
             case "php8":
