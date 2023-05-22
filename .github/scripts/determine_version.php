@@ -43,6 +43,4 @@ switch ($inputVersion) {
         break;
 }
 
-echo $nextVersion;
-
 return $nextVersion;
